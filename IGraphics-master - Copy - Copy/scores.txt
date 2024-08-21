@@ -1,0 +1,306 @@
+# include "iGraphics.h"
+
+//Screen
+double Screen_H=800,Screen_W=1000;
+
+//maze size
+double maze_x=200,maze_y=200;
+
+//maze layout
+int total_cell=342;
+int wall_h=20,wall_w=20;
+int maze_row=18,maze_col=19;
+
+struct Cell{
+
+double x;
+double y;
+int type=0;
+
+}cells[342];
+
+struct Player{
+
+double player_x=21;
+double player_y=21+20*1;
+int player_direction=1; // 0->uo, 1->right, 2->down, 3->up
+int player_cell;
+
+}pacman;
+
+int maze[18][19]=
+   {{1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1},
+    {1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,1},
+    {1,0,1,1,1,0,1,1,0,1,0,1,1,0,1,1,1,0,1},
+    {1,0,1,1,1,0,0,0,0,0,0,0,0,0,1,1,1,0,1},
+    {1,0,0,0,0,0,1,1,1,1,1,1,1,0,0,0,0,0,1},
+    {1,0,1,1,1,0,0,0,0,1,0,0,0,0,1,1,1,0,1},
+    {1,0,0,0,0,0,1,1,0,1,0,1,1,0,0,0,0,0,1},
+    {1,1,1,1,0,1,1,1,0,0,0,1,1,1,0,1,1,1,1},
+    {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+    {1,1,1,1,0,1,0,1,1,1,1,1,0,1,0,1,1,1,1},
+    {1,0,0,0,0,1,0,1,2,2,2,1,0,1,0,0,0,0,1},
+    {1,0,1,1,0,1,0,1,1,2,1,1,0,1,0,1,1,0,1},
+    {1,0,1,1,0,0,0,0,0,0,0,0,0,0,0,1,1,0,1},
+    {1,0,1,1,0,0,0,1,0,0,0,1,0,0,0,1,1,0,1},
+    {1,0,0,0,0,1,0,1,1,1,1,1,0,1,0,0,0,0,1},
+    {1,0,1,1,1,1,0,0,0,1,0,0,0,1,1,1,1,0,1},
+    {1,0,0,0,0,0,0,1,0,0,0,1,0,0,0,0,0,0,1},
+    {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}
+};
+
+//ghost
+struct Enemy{
+double ghost_x=21;
+double ghost_y=21+20*9;
+double ghost_h=18;
+double ghost_w=18;
+bool moving=false;
+int ghost_direction=1;// 0->up, 1->right, 2->down, 3->left
+int temp;
+int ghost_cell;
+int timer=4;
+}pinky,inky,clyde,onger;
+
+//Prototype Declare
+void define_maze();
+void ghost_move();
+void player_move();
+
+void iDraw()
+{
+    //place your drawing codes here
+    iClear();
+
+    iPoint(cells[pacman.player_cell].x,cells[pacman.player_cell].y,4);
+
+    //Draw Maze
+    for(int i=0;i<total_cell;i++)
+    {
+        if(cells[i].type==1)
+        {
+            iShowBMP(cells[i].x,cells[i].y,"Wall.bmp");
+        }
+    }
+
+    //Draw Ghost
+    iShowBMP2(maze_x+pinky.ghost_x,maze_y+pinky.ghost_y,"Ghost.bmp",0);
+    iShowBMP2(maze_x+pacman.player_x,maze_y+pacman.player_y,"pac_1.bmp",0);
+
+}
+
+/*
+	function iMouseMove() is called when the user presses and drags the mouse.
+	(mx, my) is the position where the mouse pointer is.
+*/
+void iMouseMove(int mx, int my)
+{
+    //place your codes here
+}
+
+/*
+	function iMouse() is called when the user presses/releases the mouse.
+	(mx, my) is the position where the mouse pointer is.
+*/
+void iMouse(int button, int state, int mx, int my)
+{
+    if(button == GLUT_LEFT_BUTTON && state == GLUT_DOWN)
+    {
+
+    }
+    if(button == GLUT_RIGHT_BUTTON && state == GLUT_DOWN)
+    {
+
+    }
+}
+
+/*
+	function iKeyboard() is called whenever the user hits a key in keyboard.
+	key- holds the ASCII value of the key pressed.
+*/
+void iKeyboard(unsigned char key)
+{
+    if(key == 'q')
+    {
+        exit(0);
+    }
+
+}
+
+/*
+	function iSpecialKeyboard() is called whenver user hits special keys like-
+	function keys, home, end, pg up, pg down, arraows etc. you have to use
+	appropriate constants to detect them. A list is:
+	GLUT_KEY_F1, GLUT_KEY_F2, GLUT_KEY_F3, GLUT_KEY_F4, GLUT_KEY_F5, GLUT_KEY_F6,
+	GLUT_KEY_F7, GLUT_KEY_F8, GLUT_KEY_F9, GLUT_KEY_F10, GLUT_KEY_F11, GLUT_KEY_F12,
+	GLUT_KEY_LEFT, GLUT_KEY_UP, GLUT_KEY_RIGHT, GLUT_KEY_DOWN, GLUT_KEY_PAGE UP,
+	GLUT_KEY_PAGE DOWN, GLUT_KEY_HOME, GLUT_KEY_END, GLUT_KEY_INSERT
+*/
+void iSpecialKeyboard(unsigned char key)
+{
+
+    if(key == GLUT_KEY_UP)
+    {
+        pacman.player_direction=0;
+    }
+
+    if(key == GLUT_KEY_RIGHT)
+    {
+        pacman.player_direction=1;
+    }
+
+    if(key == GLUT_KEY_LEFT)
+    {
+        pacman.player_direction=3;
+    }
+
+    if(key == GLUT_KEY_DOWN)
+    {
+        pacman.player_direction=2;
+    }
+
+}
+
+void define_maze()
+{
+    for(int i=0;i<maze_row;i++)
+    {
+        for(int j=0;j<maze_col;j++)
+        {
+            cells[i*maze_col+j].x=maze_x+j*wall_w;
+            cells[i*maze_col+j].y=maze_y+maze_row*wall_h-i*wall_h;
+
+            if(maze[i][j]==1)
+            {
+                cells[i*maze_col+j].type=1;
+            }
+
+        }
+
+    }
+}
+
+void player_move()
+{
+    if((pacman.player_x==1 && pacman.player_direction==3) || (pacman.player_x==maze_col*(wall_h-1) && pacman.player_direction==1))
+    {
+        if(pacman.player_x==1)
+            pacman.player_x=maze_col+(wall_h+1);
+        else
+            pacman.player_x=1;
+
+            //timer=4;
+
+    }
+
+    else
+    {
+        pacman.player_cell= (int)pacman.player_x/wall_h + ((maze_row-(int)pacman.player_y/wall_h)*maze_col);
+
+        if(pacman.player_direction==1 && cells[pacman.player_cell+1].type!=1)
+        {
+            pacman.player_x+=5;
+        }
+
+        if(pacman.player_direction==2 && cells[pacman.player_cell].type!=1)
+        {
+            pacman.player_y-=5;
+        }
+
+        if(pacman.player_direction==3 && cells[pacman.player_cell].type!=1)
+        {
+            pacman.player_x-=5;
+        }
+
+         if(pacman.player_direction==0 && cells[pacman.player_cell-maze_col].type!=1)
+        {
+            pacman.player_y+=5;
+        }
+
+     //timer=4;
+    }
+
+//timer--;
+}
+
+
+void ghost_move()
+{
+    // 0->up, 1->right, 2->down, 3->left
+
+    if((pinky.ghost_x==1 && pinky.ghost_direction==3)||(pinky.ghost_x==maze_col*(wall_h-1) && pinky.ghost_direction==1))
+    {
+        if(pinky.ghost_x==1)
+            pinky.ghost_x=maze_col*wall_w+1;
+        else
+            pinky.ghost_x=1;
+
+        pinky.timer=4;
+    }
+    else
+    {
+        pinky.ghost_cell=(int)(pinky.ghost_x/wall_w)+(maze_row-(int)(pinky.ghost_y/wall_h))*maze_col;
+
+        if((cells[pinky.ghost_cell+1].type==0||cells[pinky.ghost_cell-1].type==0||
+           cells[pinky.ghost_cell+maze_col].type==0||cells[pinky.ghost_cell-maze_col].type==0) && pinky.timer<=0)
+        {
+            srand(time(0));
+            pinky.temp=rand()%4;
+
+            while(true)
+            {
+                if(pinky.temp==1 && cells[pinky.ghost_cell+1].type==0 && pinky.ghost_direction!=3) break;
+                else if(pinky.temp==3 && cells[pinky.ghost_cell-1].type==0 && pinky.ghost_direction!=1) break;
+                else if(pinky.temp==0 && cells[pinky.ghost_cell-maze_col].type==0 && pinky.ghost_direction!=2) break;
+                else if(pinky.temp==2&&cells[pinky.ghost_cell+maze_col].type==0 && pinky.ghost_direction!=0) break;
+
+                pinky.temp=(pinky.temp+1)%4;
+            }
+            pinky.ghost_direction=pinky.temp;
+            pinky.timer=4;
+
+        }
+    }
+        //printf("%d %d\n",ghost_cell,cells[ghost_cell].show);
+
+        if(pinky.ghost_direction==0)
+        {
+            pinky.ghost_y+=5;
+        }
+        else if(pinky.ghost_direction==1)
+        {
+            pinky.ghost_x+=5;
+        }
+        else if(pinky.ghost_direction==2)
+        {
+            pinky.ghost_y-=5;
+        }
+        else if(pinky.ghost_direction==3)
+        {
+            pinky.ghost_x-=5;
+        }
+
+        pinky.timer--;
+
+}
+
+void ghost_animation()
+{
+        // 0->up, 1->right, 2->down, 3->left
+
+    if(pinky.ghost_direction==1)
+    {
+
+    }
+}
+
+
+int main()
+{
+    //place your own initialization codes here.
+    define_maze();
+    iSetTimer(25,ghost_move);
+    iSetTimer(25,player_move);
+    iInitialize(Screen_W, Screen_H, "Pac-man!");
+    return 0;
+}
